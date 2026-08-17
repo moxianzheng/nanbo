@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>水友互动意见箱</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --neon-cyan: #00f0ff;
+      --neon-pink: #ff00ff;
+      --neon-purple: #b026ff;
+      --neon-yellow: #f0ff00;
+      --dark-bg: #0a0a12;
+      --card-bg: #12121a;
+      --text-primary: #e0e0ff;
+      --text-secondary: #8888aa;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--dark-bg);
+      min-height: 100vh;
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(90deg, transparent 49%, rgba(0, 240, 255, 0.03) 50%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, rgba(0, 240, 255, 0.03) 50%, transparent 51%);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at 20% 20%, rgba(176, 38, 255, 0.15) 0%, transparent 50%),
+                  radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+      letter-spacing: 2px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .header h1::after {
+      content: '水友互动意见箱';
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: blur(8px);
+      opacity: 0.7;
+      z-index: -1;
+    }
+
+    .header .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      letter-spacing: 1px;
+    }
+
+    .publish-section {
+      background: linear-gradient(145deg, rgba(18, 18, 26, 0.9), rgba(10, 10, 18, 0.95));
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .publish-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+    }
+
+    .publish-section h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      color: var(--neon-cyan);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .publish-section h3::before {
+      content: '>';
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .input-field {
+      flex: 1;
+    }
+
+    .input-field label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .input-field input,
+    .input-field textarea,
+    .input-field select {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text-primary);
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .input-field input:focus,
+    .input-field textarea:focus,
+    .input-field select:focus {
+      outline: none;
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 10px rgba(0, 240, 255, 0.1);
+    }
+
+    .input-field textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .input-field select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300f0ff'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    .input-field select option {
+      background: var(--dark-bg);
+      color: var(--text-primary);
+    }
+
+    .publish-btn {
+      width: 100%;
+      padding: 14px 24px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--dark-bg);
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .publish-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .publish-btn:hover::before {
+      left: 100%;
+    }
+
+    .publish-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 240, 255, 0.4);
+    }
+
+    .publish-btn:active {
+      transform: translateY(0);
+    }
+
+    .tabs-container {
+      background: linear-gradient(145deg, rgba(18, 18, 26, 0.9), rgba(10, 10, 18, 0.95));
+      border: 1px solid rgba(176, 38, 255, 0.2);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .tabs-header {
+      display: flex;
+      border-bottom: 1px solid rgba(176, 38, 255, 0.2);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 16px 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: var(--neon-pink);
+      transition: width 0.3s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(176, 38, 255, 0.1);
+    }
+
+    .tab-btn.active {
+      color: var(--neon-pink);
+      background: rgba(176, 38, 255, 0.15);
+    }
+
+    .tab-btn.active::after {
+      width: 60%;
+    }
+
+    .tab-btn .tab-icon {
+      display: block;
+      font-size: 1.2rem;
+      margin-bottom: 4px;
+    }
+
+    .tab-btn .tab-count {
+      display: inline-block;
+      background: rgba(0, 240, 255, 0.2);
+      color: var(--neon-cyan);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.65rem;
+      margin-left: 4px;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 16px;
+      min-height: 300px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .tab-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .tab-content::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+
+    .tab-content::-webkit-scrollbar-thumb {
+      background: var(--neon-purple);
+      border-radius: 3px;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      font-family: 'Noto Sans SC', sans-serif;
+      color: var(--text-secondary);
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    .filter-btn.active {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    .message-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message-item {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(176, 38, 255, 0.15);
+      border-radius: 12px;
+      padding: 16px;
+      position: relative;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, var(--neon-pink), var(--neon-purple));
+      border-radius: 3px 0 0 3px;
+    }
+
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .message-author {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+    }
+
+    .message-time {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    .message-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+      word-break: break-word;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: transparent;
+    }
+
+    .action-btn.crazy {
+      color: var(--neon-yellow);
+      border-color: rgba(240, 255, 0, 0.4);
+    }
+
+    .action-btn.crazy:hover:not(:disabled) {
+      background: rgba(240, 255, 0, 0.15);
+      box-shadow: 0 0 15px rgba(240, 255, 0, 0.3);
+    }
+
+    .action-btn.approve {
+      color: var(--neon-cyan);
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+
+    .action-btn.approve:hover:not(:disabled) {
+      background: rgba(0, 240, 255, 0.15);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .action-btn.voted {
+      opacity: 0.7;
+    }
+
+    .action-btn .count {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+    }
+
+    .action-btn.crazy .count {
+      background: rgba(240, 255, 0, 0.2);
+    }
+
+    .action-btn.approve .count {
+      background: rgba(0, 240, 255, 0.2);
+    }
+
+    @keyframes flash-green {
+      0% { box-shadow: 0 0 0 0 rgba(0, 255, 100, 0.7); }
+      50% { box-shadow: 0 0 30px 10px rgba(0, 255, 100, 0.5); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 255, 100, 0); }
+    }
+
+    @keyframes flash-red {
+      0% { box-shadow: 0 0 0 0 rgba(255, 50, 50, 0.7); }
+      50% { box-shadow: 0 0 30px 10px rgba(255, 50, 50, 0.5); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 50, 50, 0); }
+    }
+
+    .action-btn.approve.flash-active {
+      animation: flash-green 0.6s ease-out;
+    }
+
+    .action-btn.crazy.flash-active {
+      animation: flash-red 0.6s ease-out;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state .icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
+      color: white;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 5px 30px rgba(176, 38, 255, 0.5);
+      opacity: 0;
+      transition: all 0.4s ease;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .glow-line {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), transparent);
+      animation: scanline 3s linear infinite;
+      z-index: 100;
+    }
+
+    @keyframes scanline {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+
+    .reset-btn {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      width: 32px;
+      height: 32px;
+      background: rgba(255, 50, 50, 0.15);
+      border: 1px solid rgba(255, 50, 50, 0.3);
+      border-radius: 8px;
+      color: rgba(255, 50, 50, 0.5);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0.3;
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .reset-btn:hover {
+      opacity: 1;
+      background: rgba(255, 50, 50, 0.25);
+      border-color: rgba(255, 50, 50, 0.6);
+      color: #ff3232;
+      box-shadow: 0 0 15px rgba(255, 50, 50, 0.3);
+    }
+
+    .reset-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+    }
+
+    .reset-modal.show {
+      display: flex;
+    }
+
+    .reset-modal-content {
+      background: linear-gradient(145deg, rgba(18, 18, 26, 0.98), rgba(10, 10, 18, 0.99));
+      border: 1px solid rgba(255, 50, 50, 0.4);
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    .reset-modal-content h4 {
+      font-family: 'Orbitron', sans-serif;
+      color: #ff3232;
+      margin-bottom: 12px;
+    }
+
+    .reset-modal-content p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .reset-modal-btns {
+      display: flex;
+      gap: 12px;
+    }
+
+    .reset-modal-btns button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .reset-modal-btns .cancel-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-secondary);
+    }
+
+    .reset-modal-btns .cancel-btn:hover {
+      border-color: rgba(255, 255, 255, 0.4);
+      color: var(--text-primary);
+    }
+
+    .reset-modal-btns .confirm-btn {
+      background: rgba(255, 50, 50, 0.2);
+      border: 1px solid rgba(255, 50, 50, 0.5);
+      color: #ff3232;
+    }
+
+    .reset-modal-btns .confirm-btn:hover {
+      background: rgba(255, 50, 50, 0.35);
+      box-shadow: 0 0 15px rgba(255, 50, 50, 0.3);
+    }
+
+    .settings-btn {
+      position: fixed;
+      bottom: 15px;
+      right: 55px;
+      width: 32px;
+      height: 32px;
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 8px;
+      color: rgba(0, 240, 255, 0.5);
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0.3;
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .settings-btn:hover {
+      opacity: 1;
+      background: rgba(0, 240, 255, 0.25);
+      border-color: rgba(0, 240, 255, 0.6);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+
+    .password-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1001;
+    }
+
+    .password-modal.show {
+      display: flex;
+    }
+
+    .password-modal-content {
+      background: linear-gradient(145deg, rgba(18, 18, 26, 0.98), rgba(10, 10, 18, 0.99));
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    .password-modal-content h4 {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--neon-cyan);
+      margin-bottom: 12px;
+    }
+
+    .password-modal-content p {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    .password-modal-content input {
+      width: 100%;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .password-modal-content input:focus {
+      outline: none;
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+
+    .password-modal-btns {
+      display: flex;
+      gap: 12px;
+    }
+
+    .password-modal-btns button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .password-modal-btns .cancel-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-secondary);
+    }
+
+    .password-modal-btns .cancel-btn:hover {
+      border-color: rgba(255, 255, 255, 0.4);
+      color: var(--text-primary);
+    }
+
+    .password-modal-btns .confirm-btn {
+      background: rgba(0, 240, 255, 0.2);
+      border: 1px solid rgba(0, 240, 255, 0.5);
+      color: var(--neon-cyan);
+    }
+
+    .password-modal-btns .confirm-btn:hover {
+      background: rgba(0, 240, 255, 0.35);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+
+    .review-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.98);
+      display: none;
+      z-index: 1002;
+      overflow-y: auto;
+    }
+
+    .review-panel.show {
+      display: block;
+    }
+
+    .review-header {
+      position: sticky;
+      top: 0;
+      background: linear-gradient(145deg, #ffffff, #f5f5f7);
+      border-bottom: 1px solid rgba(255, 80, 80, 0.3);
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .review-header h3 {
+      font-family: 'Orbitron', sans-serif;
+      color: #e63946;
+      font-size: 1.1rem;
+    }
+
+    .review-close-btn {
+      padding: 10px 20px;
+      background: rgba(230, 57, 70, 0.1);
+      border: 1px solid rgba(230, 57, 70, 0.3);
+      border-radius: 8px;
+      color: #e63946;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .review-close-btn:hover {
+      background: rgba(230, 57, 70, 0.2);
+      box-shadow: 0 0 15px rgba(230, 57, 70, 0.2);
+    }
+
+    .review-header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .review-reset-btn {
+      padding: 10px 20px;
+      background: rgba(255, 120, 73, 0.1);
+      border: 1px solid rgba(255, 120, 73, 0.3);
+      border-radius: 8px;
+      color: #ff7849;
+      cursor: pointer;
+      font-family: 'Noto Sans SC', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .review-reset-btn:hover {
+      background: rgba(255, 120, 73, 0.2);
+      box-shadow: 0 0 15px rgba(255, 120, 73, 0.2);
+    }
+
+    .review-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 16px 20px 0;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .review-tab-btn {
+      padding: 10px 16px;
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 8px 8px 0 0;
+      color: #555;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .review-tab-btn.active {
+      background: rgba(230, 57, 70, 0.15);
+      border-color: rgba(230, 57, 70, 0.4);
+      color: #e63946;
+    }
+
+    .review-tab-btn:hover:not(.active) {
+      border-color: rgba(0, 0, 0, 0.3);
+      color: var(--text-primary);
+    }
+
+    .review-batch-actions {
+      display: flex;
+      gap: 12px;
+      padding: 16px 20px;
+      max-width: 700px;
+      margin: 0 auto;
+      border-bottom: 1px solid rgba(230, 57, 70, 0.2);
+    }
+
+    .review-batch-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .review-batch-btn.approve {
+      background: rgba(46, 125, 50, 0.15);
+      border: 1px solid rgba(46, 125, 50, 0.4);
+      color: #2e7d32;
+    }
+
+    .review-batch-btn.select {
+      background: rgba(33, 150, 243, 0.15);
+      border: 1px solid rgba(33, 150, 243, 0.4);
+      color: #1976d2;
+    }
+
+    .review-batch-btn.select:hover {
+      background: rgba(33, 150, 243, 0.25);
+      box-shadow: 0 0 15px rgba(33, 150, 243, 0.25);
+    }
+
+    .review-pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      margin-top: 10px;
+    }
+
+    .review-pagination button {
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: #333;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .review-pagination button:hover:not(:disabled) {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .review-pagination button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .review-pagination span {
+      color: #666;
+    }
+
+    .review-batch-btn.approve:hover {
+      background: rgba(46, 125, 50, 0.25);
+      box-shadow: 0 0 15px rgba(46, 125, 50, 0.25);
+    }
+
+    .review-batch-btn.reject {
+      background: rgba(230, 57, 70, 0.15);
+      border: 1px solid rgba(230, 57, 70, 0.4);
+      color: #e63946;
+    }
+
+    .review-batch-btn.reject:hover {
+      background: rgba(230, 57, 70, 0.25);
+      box-shadow: 0 0 15px rgba(230, 57, 70, 0.25);
+    }
+
+    .review-batch-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .review-batch-btn:disabled:hover {
+      background: rgba(46, 125, 50, 0.15);
+      box-shadow: none;
+    }
+
+    .review-content {
+      padding: 20px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .review-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .review-empty .icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .review-item {
+      background: #fff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .review-item:hover {
+      background: #fafafa;
+    }
+
+    .review-item.selected {
+      border-color: rgba(46, 125, 50, 0.6);
+      box-shadow: 0 0 10px rgba(46, 125, 50, 0.15);
+    }
+
+    .review-item.rejected-tab {
+      border-color: rgba(255, 152, 0, 0.4);
+    }
+
+    .review-item.rejected-tab.selected {
+      border-color: rgba(46, 125, 50, 0.6);
+    }
+
+    .review-item-checkbox {
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .review-item:hover .review-item-checkbox {
+      opacity: 1;
+    }
+
+    .review-item-body {
+      flex: 1;
+    }
+
+    .review-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .review-item-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .review-item-author {
+      font-family: 'Orbitron', sans-serif;
+      color: #1976d2;
+      font-size: 0.85rem;
+    }
+
+    .review-item-category {
+      background: rgba(156, 39, 176, 0.15);
+      color: #7b1fa2;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+    }
+
+    .review-item-time {
+      color: #888;
+      font-size: 0.75rem;
+    }
+
+    .review-item-content {
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      word-break: break-word;
+    }
+
+    .review-item-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .review-action-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .review-action-btn.approve {
+      background: rgba(46, 125, 50, 0.15);
+      border: 1px solid rgba(46, 125, 50, 0.4);
+      color: #2e7d32;
+    }
+
+    .review-action-btn.approve:hover {
+      background: rgba(46, 125, 50, 0.25);
+      box-shadow: 0 0 15px rgba(46, 125, 50, 0.3);
+    }
+
+    .review-action-btn.reject {
+      background: rgba(230, 57, 70, 0.15);
+      border: 1px solid rgba(230, 57, 70, 0.4);
+      color: #e63946;
+    }
+
+    .review-action-btn.reject:hover {
+      background: rgba(230, 57, 70, 0.25);
+      box-shadow: 0 0 15px rgba(230, 57, 70, 0.3);
+    }
+
+    .pending-banner {
+      background: rgba(255, 152, 0, 0.15);
+      border: 1px solid rgba(255, 152, 0, 0.4);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: #e65100;
+    }
+
+    .pending-banner .icon {
+      font-size: 1.2rem;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 12px;
+      }
+
+      .header h1 {
+        font-size: 1.4rem;
+      }
+
+      .publish-section {
+        padding: 16px;
+      }
+
+      .input-row {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .tab-btn {
+        padding: 12px 4px;
+        font-size: 0.65rem;
+      }
+
+      .tab-btn .tab-icon {
+        font-size: 1rem;
+      }
+
+      .message-item {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-line"></div>
+  
+  <div class="container">
+    <header class="header">
+      <h1>南波万·万言书</h1>
+      <p class="subtitle">// NANBOWAN VOICE SYSTEM</p>
+    </header>
+
+    <section class="publish-section">
+      <h3>发布消息</h3>
+      <div class="input-field" style="margin-bottom: 12px;">
+        <label>选择分区</label>
+        <select id="category">
+          <option value="treehole">水水树洞</option>
+          <option value="operator">狗运营信箱</option>
+            <option value="nezha">哪吒故事会</option>
+        </select>
+      </div>
+      <div class="input-field" style="margin-bottom: 12px;">
+        <label>内容</label>
+        <textarea id="message" placeholder="说点什么吧..." maxlength="500"></textarea>
+      </div>
+      <button class="publish-btn" onclick="publishMessage()">发射信号</button>
+    </section>
+
+    <div class="tabs-container">
+      <div class="tabs-header">
+        <button class="tab-btn active" data-tab="treehole">
+          <span class="tab-icon">🌳</span>
+          水水树洞
+          <span class="tab-count" id="count-treehole">0</span>
+        </button>
+        <button class="tab-btn" data-tab="operator">
+          <span class="tab-icon">📮</span>
+          狗运营信箱
+          <span class="tab-count" id="count-operator">0</span>
+        </button>
+        <button class="tab-btn" data-tab="nezha">
+          <span class="tab-icon">🔥</span>
+          哪吒故事会
+          <span class="tab-count" id="count-nezha">0</span>
+        </button>
+      </div>
+
+      <div class="tab-content active" id="content-treehole">
+        <div class="filter-bar">
+          <button class="filter-btn active" data-filter="time" onclick="filterMessages('treehole', 'time')">最新优先</button>
+          <button class="filter-btn" data-filter="crazy" onclick="filterMessages('treehole', 'crazy')">胡闹最多</button>
+          <button class="filter-btn" data-filter="approve" onclick="filterMessages('treehole', 'approve')">认可最多</button>
+        </div>
+        <div class="message-list" id="list-treehole"></div>
+      </div>
+
+      <div class="tab-content" id="content-operator">
+        <div class="filter-bar">
+          <button class="filter-btn active" data-filter="time" onclick="filterMessages('operator', 'time')">最新优先</button>
+          <button class="filter-btn" data-filter="crazy" onclick="filterMessages('operator', 'crazy')">胡闹最多</button>
+          <button class="filter-btn" data-filter="approve" onclick="filterMessages('operator', 'approve')">认可最多</button>
+        </div>
+        <div class="message-list" id="list-operator"></div>
+      </div>
+
+      <div class="tab-content" id="content-nezha">
+        <div class="filter-bar">
+          <button class="filter-btn active" data-filter="time" onclick="filterMessages('nezha', 'time')">最新优先</button>
+          <button class="filter-btn" data-filter="crazy" onclick="filterMessages('nezha', 'crazy')">胡闹最多</button>
+          <button class="filter-btn" data-filter="approve" onclick="filterMessages('nezha', 'approve')">认可最多</button>
+        </div>
+        <div class="message-list" id="list-nezha"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <button class="settings-btn" onclick="showPasswordModal()" title="审核面板">⚙️</button>
+
+  <div class="password-modal" id="passwordModal">
+    <div class="password-modal-content">
+      <h4>🔐 运营密码</h4>
+      <p>请输入审核密码进入后台</p>
+      <input type="password" id="passwordInput" placeholder="输入密码..." maxlength="20">
+      <div class="password-modal-btns">
+        <button class="cancel-btn" onclick="hidePasswordModal()">取消</button>
+        <button class="confirm-btn" onclick="checkPassword()">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="review-panel" id="reviewPanel">
+    <div class="review-header" id="reviewHeader">
+      <h3>📋 待审核列表</h3>
+      <button class="review-close-btn" onclick="hideReviewPanel()">退出审核</button>
+    </div>
+    <div class="review-content" id="reviewContent"></div>
+  </div>
+
+  <div class="reset-modal" id="resetModal">
+    <div class="reset-modal-content">
+      <h4>⚠️ 确认重置</h4>
+      <p>这将清空所有消息数据、投票记录和用户记录。<br>重置后可重新加载示例数据。</p>
+      <input type="password" id="resetPasswordInput" placeholder="输入管理员密码..." maxlength="20">
+      <div class="reset-modal-btns">
+        <button class="cancel-btn" onclick="hideResetModal()">取消</button>
+        <button class="confirm-btn" onclick="confirmReset()">确认重置</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'voiceBoxMessages';
+    const ACTION_KEY = 'voiceBoxActions';
+    const PENDING_KEY = 'voiceBoxPending';
+    const REVIEW_PASSWORD = '8888';
+    
+    let currentFilters = {
+      treehole: 'time',
+      operator: 'time',
+      nezha: 'time'
+    };
+
+    // 敏感词列表（简化示例）
+    const SENSITIVE_WORDS = [
+      // 政治相关
+      '共产党', '国民党', '民主', '人权', '示威', '游行', '抗议', '天安门',
+      '六四', '坦克人', '法轮功', '真善忍', '藏独', '疆独', '台独',
+      '国家领导人', '主席', '总书记', '总理',
+      // 脏话/粗口（简化处理）
+      '傻逼', '智障', '脑残', '废物', '垃圾', '操', '艹', '草泥马',
+      '你妈', '他妈', '她妈', '去死', '滚蛋'
+    ];
+
+    function filterSensitiveWords(text) {
+      let filtered = text;
+      SENSITIVE_WORDS.forEach(word => {
+        const regex = new RegExp(word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+        filtered = filtered.replace(regex, '***');
+      });
+      return filtered;
+    }
+
+    function generateMockIP() {
+      return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+    }
+
+    function getMockIP() {
+      let ip = localStorage.getItem('mockUserIP');
+      if (!ip) {
+        ip = generateMockIP();
+        localStorage.setItem('mockUserIP', ip);
+      }
+      return ip;
+    }
+
+    function getMessages() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    }
+
+    function saveMessages(messages) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    }
+
+    function getUserActions() {
+      const data = localStorage.getItem(ACTION_KEY);
+      return data ? JSON.parse(data) : {};
+    }
+
+    function saveUserActions(actions) {
+      localStorage.setItem(ACTION_KEY, JSON.stringify(actions));
+    }
+
+    function initSampleData() {
+      const messages = getMessages();
+      if (messages.length === 0) {
+        const sampleData = [
+          {
+            id: 'sample_' + Date.now() + '_1',
+            content: '今天的直播太精彩了！哪吒的台词设计很有深度，看得我都泪目了。',
+            category: 'treehole',
+            status: 'approved',
+            crazy: Math.floor(Math.random() * 20) + 5,
+            approve: Math.floor(Math.random() * 30) + 10,
+            time: Date.now() - 3600000
+          },
+          {
+            id: 'sample_' + Date.now() + '_2',
+            content: '建议增加一些互动环节，比如让观众投票决定剧情走向，这样更有参与感！',
+            category: 'treehole',
+            status: 'approved',
+            crazy: Math.floor(Math.random() * 15) + 3,
+            approve: Math.floor(Math.random() * 25) + 8,
+            time: Date.now() - 7200000
+          },
+          {
+            id: 'sample_' + Date.now() + '_3',
+            content: '希望能在周五晚上增加一场特别直播，周末时间段也可以适当延长一下~',
+            category: 'operator',
+            status: 'approved',
+            crazy: Math.floor(Math.random() * 10) + 2,
+            approve: Math.floor(Math.random() * 20) + 5,
+            time: Date.now() - 1800000
+          },
+          {
+            id: 'sample_' + Date.now() + '_4',
+            content: '运营大大什么时候出周边啊？哪吒的手办我真的会买爆！求求了！',
+            category: 'operator',
+            status: 'approved',
+            crazy: Math.floor(Math.random() * 25) + 10,
+            approve: Math.floor(Math.random() * 35) + 15,
+            time: Date.now() - 5400000
+          },
+          {
+            id: 'sample_' + Date.now() + '_5',
+            content: '哪吒敖丙的友情线太戳人了，想知道现实中有没有类似的真挚友情故事可以分享？',
+            category: 'nezha',
+            status: 'approved',
+            crazy: Math.floor(Math.random() * 18) + 7,
+            approve: Math.floor(Math.random() * 28) + 12,
+            time: Date.now() - 2700000
+          }
+        ];
+        saveMessages(sampleData);
+      } else {
+        // 确保旧数据有 status 字段
+        let updated = false;
+        messages.forEach(msg => {
+          if (!msg.status) {
+            msg.status = 'approved';
+            updated = true;
+          }
+        });
+        if (updated) {
+          saveMessages(messages);
+        }
+      }
+    }
+
+    function renderMessages() {
+      const messages = getMessages();
+      const userActions = getUserActions();
+      const userIP = getMockIP();
+      const pendingIds = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
+
+      ['treehole', 'operator', 'nezha'].forEach(category => {
+        // 只显示已通过审核的内容
+        const categoryMessages = messages.filter(m => m.category === category && m.status === 'approved');
+        const listEl = document.getElementById(`list-${category}`);
+        const countEl = document.getElementById(`count-${category}`);
+        
+        countEl.textContent = categoryMessages.length;
+
+        if (categoryMessages.length === 0) {
+          const emptyMessages = {
+            treehole: '水水们都在憋大招，快来第一个分享！',
+            operator: '运营大大在等待你的建议，快来轰炸吧！',
+            nezha: '哪吒的故事会等你来续写，快来第一个分享！'
+          };
+          const emptyIcons = {
+            treehole: '🌳',
+            operator: '📮',
+            nezha: '🔥'
+          };
+          
+          // 检查是否有该分区的待审核内容
+          const hasPending = messages.some(m => m.category === category && m.status === 'pending');
+          
+          let pendingBanner = '';
+          if (hasPending) {
+            pendingBanner = `
+              <div class="pending-banner">
+                <span class="icon">⏳</span>
+                <span>你提交的内容正在审核中，通过后将展示在这里~</span>
+              </div>
+            `;
+          }
+          
+          listEl.innerHTML = `
+            ${pendingBanner}
+            <div class="empty-state">
+              <div class="icon">${emptyIcons[category]}</div>
+              <p>${emptyMessages[category]}</p>
+            </div>
+          `;
+          return;
+        }
+
+        let sortedMessages = [...categoryMessages];
+        const filter = currentFilters[category];
+        
+        if (filter === 'crazy') {
+          sortedMessages.sort((a, b) => b.crazy - a.crazy);
+        } else if (filter === 'approve') {
+          sortedMessages.sort((a, b) => b.approve - a.approve);
+        } else {
+          sortedMessages.sort((a, b) => b.time - a.time);
+        }
+
+        listEl.innerHTML = sortedMessages.map(msg => {
+          const userMsgActions = userActions[userIP] || {};
+          const userChoice = userMsgActions[msg.id]?.choice;
+          const timeStr = formatTime(msg.time);
+
+          return `
+            <div class="message-item">
+              <div class="message-header">
+                <span class="message-time">${timeStr}</span>
+              </div>
+              <div class="message-content">${escapeHtml(msg.content)}</div>
+              <div class="message-actions">
+                <button class="action-btn crazy ${userChoice === 'crazy' ? 'voted' : ''}" ${userChoice === 'approve' ? 'disabled' : ''} onclick="vote('${msg.id}', 'crazy')">
+                  胡闹 <span class="count">${msg.crazy}</span>
+                </button>
+                <button class="action-btn approve ${userChoice === 'approve' ? 'voted' : ''}" ${userChoice === 'crazy' ? 'disabled' : ''} onclick="vote('${msg.id}', 'approve')">
+                  认可 <span class="count">${msg.approve}</span>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatTime(timestamp) {
+      const diff = Date.now() - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+
+      if (minutes < 1) return '刚刚';
+      if (minutes < 60) return `${minutes}分钟前`;
+      if (hours < 24) return `${hours}小时前`;
+      return `${days}天前`;
+    }
+
+    function publishMessage() {
+      const content = document.getElementById('message').value.trim();
+      const category = document.getElementById('category').value;
+
+      if (!content) {
+        showToast('请输入内容~');
+        document.getElementById('message').focus();
+        return;
+      }
+
+      const filteredContent = filterSensitiveWords(content);
+
+      const messages = getMessages();
+      const newMessage = {
+        id: 'msg_' + Date.now(),
+        content: filteredContent,
+        category: category,
+        status: 'pending',
+        crazy: 0,
+        approve: 0,
+        time: Date.now()
+      };
+
+      messages.push(newMessage);
+      saveMessages(messages);
+
+      const pendingIds = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
+      pendingIds.push(newMessage.id);
+      localStorage.setItem(PENDING_KEY, JSON.stringify(pendingIds));
+
+      document.getElementById('message').value = '';
+
+      showToast('你的分享已提交，审核通过后将在对应分区展示~');
+      renderMessages();
+    }
+
+    function vote(messageId, type) {
+      const messages = getMessages();
+      const msgIndex = messages.findIndex(m => m.id === messageId);
+      
+      if (msgIndex === -1) return;
+
+      const userIP = getMockIP();
+      const userActions = getUserActions();
+      
+      if (!userActions[userIP]) {
+        userActions[userIP] = {};
+      }
+
+      const currentChoice = userActions[userIP][messageId]?.choice;
+
+      // 如果已经投过同类型的票，取消投票
+      if (currentChoice === type) {
+        messages[msgIndex][type]--;
+        delete userActions[userIP][messageId];
+        saveMessages(messages);
+        saveUserActions(userActions);
+        showToast('取消' + (type === 'crazy' ? '胡闹' : '认可') + '~');
+        renderMessages();
+        return;
+      }
+
+      // 如果已经投过另一种票，先减掉原来的
+      if (currentChoice) {
+        messages[msgIndex][currentChoice]--;
+      }
+
+      // 投新票
+      messages[msgIndex][type]++;
+      
+      if (!userActions[userIP][messageId]) {
+        userActions[userIP][messageId] = {};
+      }
+      userActions[userIP][messageId].choice = type;
+
+      saveMessages(messages);
+      saveUserActions(userActions);
+      
+      // 视觉反馈动画
+      const flashEl = document.createElement('div');
+      flashEl.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: ${type === 'crazy' ? 'rgba(255, 50, 50, 0.4)' : 'rgba(0, 255, 100, 0.4)'};
+        animation: ${type === 'crazy' ? 'flash-red' : 'flash-green'} 0.6s ease-out forwards;
+        pointer-events: none;
+        z-index: 1002;
+      `;
+      document.body.appendChild(flashEl);
+      setTimeout(() => flashEl.remove(), 600);
+      
+      showToast((type === 'crazy' ? '胡闹' : '认可') + ' +1 ✨');
+      renderMessages();
+    }
+
+    function filterMessages(category, filter) {
+      currentFilters[category] = filter;
+      
+      const contentEl = document.getElementById(`content-${category}`);
+      const filterBtns = contentEl.querySelectorAll('.filter-btn');
+      filterBtns.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+
+      renderMessages();
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    function showResetModal() {
+      document.getElementById('resetModal').classList.add('show');
+    }
+
+    function hideResetModal() {
+      document.getElementById('resetModal').classList.remove('show');
+    }
+
+    function confirmReset() {
+      const password = document.getElementById('resetPasswordInput').value;
+      if (password !== REVIEW_PASSWORD) {
+        showToast('密码错误！');
+        document.getElementById('resetPasswordInput').value = '';
+        return;
+      }
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(ACTION_KEY);
+      localStorage.removeItem(PENDING_KEY);
+      localStorage.removeItem('mockUserIP');
+      hideResetModal();
+      document.getElementById('resetPasswordInput').value = '';
+      showToast('数据已重置！');
+      initSampleData();
+      renderMessages();
+    }
+
+    // 审核面板相关函数
+    function showPasswordModal() {
+      document.getElementById('passwordModal').classList.add('show');
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('passwordInput').focus();
+    }
+
+    function hidePasswordModal() {
+      document.getElementById('passwordModal').classList.remove('show');
+    }
+
+    function checkPassword() {
+      const password = document.getElementById('passwordInput').value;
+      if (password === REVIEW_PASSWORD) {
+        hidePasswordModal();
+        showReviewPanel();
+      } else {
+        showToast('密码错误！');
+        document.getElementById('passwordInput').value = '';
+      }
+    }
+
+    function showReviewPanel() {
+      document.getElementById('reviewPanel').classList.add('show');
+      window.reviewCurrentTab = 'pending';
+      window.reviewPage = 1;
+      window.reviewSelectedIds = new Set();
+      renderReviewList();
+    }
+
+    function hideReviewPanel() {
+      document.getElementById('reviewPanel').classList.remove('show');
+    }
+
+    function switchReviewTab(tab) {
+      window.reviewCurrentTab = tab;
+      window.reviewPage = 1;
+      window.reviewSelectedIds = new Set();
+      renderReviewList();
+    }
+
+    function toggleReviewItem(id) {
+      if (!window.reviewSelectedIds) {
+        window.reviewSelectedIds = new Set();
+      }
+      if (window.reviewSelectedIds.has(id)) {
+        window.reviewSelectedIds.delete(id);
+      } else {
+        window.reviewSelectedIds.add(id);
+      }
+      renderReviewList();
+    }
+
+    function toggleSelectAll() {
+      if (!window.reviewSelectedIds) {
+        window.reviewSelectedIds = new Set();
+      }
+
+      const messages = getMessages();
+      let currentMessages;
+
+      if (window.reviewCurrentTab === 'pending') {
+        currentMessages = messages.filter(m => m.status === 'pending');
+      } else if (window.reviewCurrentTab === 'approved') {
+        currentMessages = messages.filter(m => m.status === 'approved');
+      } else {
+        currentMessages = messages.filter(m => m.status === 'rejected');
+      }
+
+      const PAGE_SIZE = 20;
+      const startIndex = (window.reviewPage - 1) * PAGE_SIZE;
+      const pageMessages = currentMessages.slice(startIndex, startIndex + PAGE_SIZE);
+
+      const allPageSelected = pageMessages.every(m => window.reviewSelectedIds.has(m.id));
+
+      if (allPageSelected) {
+        pageMessages.forEach(m => window.reviewSelectedIds.delete(m.id));
+      } else {
+        pageMessages.forEach(m => window.reviewSelectedIds.add(m.id));
+      }
+
+      renderReviewList();
+    }
+
+    function getPageSelectedCount() {
+      if (!window.reviewSelectedIds) return 0;
+
+      const messages = getMessages();
+      let currentMessages;
+
+      if (window.reviewCurrentTab === 'pending') {
+        currentMessages = messages.filter(m => m.status === 'pending');
+      } else if (window.reviewCurrentTab === 'approved') {
+        currentMessages = messages.filter(m => m.status === 'approved');
+      } else {
+        currentMessages = messages.filter(m => m.status === 'rejected');
+      }
+
+      const PAGE_SIZE = 20;
+      const startIndex = (window.reviewPage - 1) * PAGE_SIZE;
+      const pageMessages = currentMessages.slice(startIndex, startIndex + PAGE_SIZE);
+
+      return pageMessages.filter(m => window.reviewSelectedIds.has(m.id)).length;
+    }
+
+    function renderReviewList() {
+      if (!window.reviewSelectedIds) {
+        window.reviewSelectedIds = new Set();
+      }
+      
+      const messages = getMessages();
+      const categoryNames = {
+        treehole: '水水树洞',
+        operator: '狗运营信箱',
+        nezha: '哪吒故事会'
+      };
+
+      const pendingMessages = messages.filter(m => m.status === 'pending');
+      const approvedMessages = messages.filter(m => m.status === 'approved');
+      const rejectedMessages = messages.filter(m => m.status === 'rejected');
+
+      let currentMessages;
+      if (window.reviewCurrentTab === 'pending') {
+        currentMessages = pendingMessages;
+      } else if (window.reviewCurrentTab === 'approved') {
+        currentMessages = approvedMessages;
+      } else {
+        currentMessages = rejectedMessages;
+      }
+
+      const PAGE_SIZE = 20;
+      if (!window.reviewPage) window.reviewPage = 1;
+      const totalPages = Math.ceil(currentMessages.length / PAGE_SIZE);
+      if (window.reviewPage > totalPages) window.reviewPage = totalPages || 1;
+      const startIndex = (window.reviewPage - 1) * PAGE_SIZE;
+      const pageMessages = currentMessages.slice(startIndex, startIndex + PAGE_SIZE);
+
+      const tabButtons = `
+        <div class="review-tabs">
+          <button class="review-tab-btn ${window.reviewCurrentTab === 'pending' ? 'active' : ''}" onclick="switchReviewTab('pending')">
+            待审核 (${pendingMessages.length})
+          </button>
+          <button class="review-tab-btn ${window.reviewCurrentTab === 'approved' ? 'active' : ''}" onclick="switchReviewTab('approved')">
+            已通过 (${approvedMessages.length})
+          </button>
+          <button class="review-tab-btn ${window.reviewCurrentTab === 'rejected' ? 'active' : ''}" onclick="switchReviewTab('rejected')">
+            已驳回 (${rejectedMessages.length})
+          </button>
+        </div>
+      `;
+
+      const batchButtons = `
+        <div class="review-batch-actions">
+          <button class="review-batch-btn select" onclick="toggleSelectAll()" ${currentMessages.length === 0 ? 'disabled' : ''}>
+            ${window.reviewSelectedIds && pageMessages.every(m => window.reviewSelectedIds.has(m.id)) ? '取消全选' : '全选'}
+          </button>
+          ${window.reviewCurrentTab !== 'approved' ? `
+            <button class="review-batch-btn approve" onclick="batchReviewAction('approved')" ${!window.reviewSelectedIds || getPageSelectedCount() === 0 ? 'disabled' : ''}>
+              ✅ 批量通过 (${getPageSelectedCount()})
+            </button>
+          ` : ''}
+          <button class="review-batch-btn reject" onclick="batchReviewAction('deleted')" ${!window.reviewSelectedIds || getPageSelectedCount() === 0 ? 'disabled' : ''}>
+            🗑️ 批量删除 (${getPageSelectedCount()})
+          </button>
+        </div>
+      `;
+
+      const paginationHtml = totalPages > 1 ? `
+        <div class="review-pagination">
+          <button onclick="changeReviewPage(${window.reviewPage - 1})" ${window.reviewPage <= 1 ? 'disabled' : ''}>◀ 上一页</button>
+          <span>第 ${window.reviewPage} / ${totalPages} 页</span>
+          <button onclick="changeReviewPage(${window.reviewPage + 1})" ${window.reviewPage >= totalPages ? 'disabled' : ''}>下一页 ▶</button>
+        </div>
+      ` : '';
+
+      let emptyIcon, emptyText;
+      let listClass = 'review-item';
+
+      if (window.reviewCurrentTab === 'pending') {
+        emptyIcon = '📋';
+        emptyText = '暂无待审核内容，棒棒的！';
+      } else if (window.reviewCurrentTab === 'approved') {
+        emptyIcon = '✅';
+        emptyText = '暂无已通过的审核记录';
+        listClass += ' approved-tab';
+      } else {
+        emptyIcon = '❌';
+        emptyText = '暂无驳回记录';
+        listClass += ' rejected-tab';
+      }
+
+      let contentHtml = tabButtons + batchButtons;
+
+      if (currentMessages.length === 0) {
+        contentHtml += `
+          <div class="review-content">
+            <div class="review-empty">
+              <div class="icon">${emptyIcon}</div>
+              <p>${emptyText}</p>
+            </div>
+          </div>
+        `;
+        document.getElementById('reviewHeader').innerHTML = `
+          <h3>审核后台</h3>
+          <button class="review-close-btn" onclick="hideReviewPanel()">关闭</button>
+        `;
+        document.getElementById('reviewContent').innerHTML = contentHtml;
+        return;
+      }
+
+      const listHtml = pageMessages.map(msg => {
+        const isSelected = window.reviewSelectedIds && window.reviewSelectedIds.has(msg.id);
+        const selectedClass = isSelected ? ' selected' : '';
+        const checkboxIcon = isSelected ? '☑️' : '☐';
+
+        return `
+          <div class="review-item${selectedClass}${listClass.includes('rejected-tab') ? ' rejected-tab' : ''}" data-id="${msg.id}" onclick="toggleReviewItem('${msg.id}')">
+            <div class="review-item-checkbox">${checkboxIcon}</div>
+            <div class="review-item-body">
+              <div class="review-item-header">
+                <span class="review-item-category">${categoryNames[msg.category]}</span>
+                <span class="review-item-time">${formatTime(msg.time)}</span>
+              </div>
+              <div class="review-item-content">${escapeHtml(msg.content)}</div>
+              ${window.reviewCurrentTab === 'pending' ? `
+                <div class="review-item-actions" onclick="event.stopPropagation()">
+                  <button class="review-action-btn approve" onclick="reviewMessage('${msg.id}', 'approved')">
+                    ✅ 通过
+                  </button>
+                  <button class="review-action-btn reject" onclick="reviewMessage('${msg.id}', 'rejected')">
+                    ❌ 驳回
+                  </button>
+                </div>
+              ` : ''}
+              ${window.reviewCurrentTab === 'rejected' ? `
+                <div class="review-item-actions" onclick="event.stopPropagation()">
+                  <button class="review-action-btn approve" onclick="reviewMessage('${msg.id}', 'approved')">
+                    ✅ 重新通过
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      contentHtml += `<div class="review-content">${listHtml}</div>`;
+      contentHtml += paginationHtml;
+
+      document.getElementById('reviewHeader').innerHTML = `
+        <h3>审核后台</h3>
+        <div class="review-header-actions">
+          <button class="review-reset-btn" onclick="showResetModal()">重置数据</button>
+          <button class="review-close-btn" onclick="hideReviewPanel()">关闭</button>
+        </div>
+      `;
+      document.getElementById('reviewContent').innerHTML = contentHtml;
+    }
+
+    function changeReviewPage(page) {
+      const messages = getMessages();
+      let currentMessages;
+      if (window.reviewCurrentTab === 'pending') {
+        currentMessages = messages.filter(m => m.status === 'pending');
+      } else if (window.reviewCurrentTab === 'approved') {
+        currentMessages = messages.filter(m => m.status === 'approved');
+      } else {
+        currentMessages = messages.filter(m => m.status === 'rejected');
+      }
+      const totalPages = Math.ceil(currentMessages.length / 20);
+      if (page >= 1 && page <= totalPages) {
+        window.reviewPage = page;
+        renderReviewList();
+      }
+    }
+
+    function batchReviewAction(action) {
+      if (!window.reviewSelectedIds || window.reviewSelectedIds.size === 0) return;
+      const selectedIds = Array.from(window.reviewSelectedIds);
+
+      const messages = getMessages();
+      let updated = false;
+
+      selectedIds.forEach(id => {
+        const msgIndex = messages.findIndex(m => m.id === id);
+        if (msgIndex !== -1) {
+          if (action === 'deleted') {
+            messages.splice(msgIndex, 1);
+          } else {
+            messages[msgIndex].status = action;
+          }
+          updated = true;
+        }
+      });
+
+      if (updated) {
+        saveMessages(messages);
+      }
+
+      window.reviewSelectedIds = new Set();
+      showToast(action === 'approved' ? '已批量通过审核！' : '已批量删除！');
+      renderReviewList();
+      renderMessages();
+    }
+
+    function reviewMessage(messageId, action) {
+      const messages = getMessages();
+      const msgIndex = messages.findIndex(m => m.id === messageId);
+      
+      if (msgIndex === -1) return;
+
+      messages[msgIndex].status = action;
+      saveMessages(messages);
+
+      // 如果是驳回或从待审核变更为其他状态，从待审核列表中移除
+      if (action !== 'pending') {
+        const pendingIds = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
+        const newPendingIds = pendingIds.filter(id => id !== messageId);
+        localStorage.setItem(PENDING_KEY, JSON.stringify(newPendingIds));
+      }
+
+      const toastMsg = action === 'approved' ? '已通过审核！' : action === 'rejected' ? '已驳回！' : '已重新通过审核！';
+      showToast(toastMsg);
+      renderReviewList();
+      renderMessages();
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        btn.classList.add('active');
+        const tabId = btn.dataset.tab;
+        document.getElementById(`content-${tabId}`).classList.add('active');
+      });
+    });
+
+    document.getElementById('message').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        publishMessage();
+      }
+    });
+
+    document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        checkPassword();
+      }
+    });
+
+    initSampleData();
+    renderMessages();
+  </script>
+</body>
+</html>
