@@ -2067,7 +2067,7 @@
       }
     }
 
-    function batchReviewAction(action) {
+    async function batchReviewAction(action) {
       if (!window.reviewSelectedIds || window.reviewSelectedIds.size === 0) return;
       const selectedIds = Array.from(window.reviewSelectedIds);
 
