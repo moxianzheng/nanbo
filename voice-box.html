@@ -1921,6 +1921,9 @@
         currentMessages = rejectedMessages;
       }
 
+      // 按时间倒序，最新的在最上面
+      currentMessages.sort((a, b) => b.time - a.time);
+
       const PAGE_SIZE = 20;
       if (!window.reviewPage) window.reviewPage = 1;
       const totalPages = Math.ceil(currentMessages.length / PAGE_SIZE);
