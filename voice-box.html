@@ -1397,17 +1397,9 @@
         const res = await fetch(`${FIREBASE_URL}/messages.json`);
         if (res.ok) {
           const data = await res.json();
-          if (data && Array.isArray(data)) {
-            // 合并云端和本地数据
-            const localMessages = getMessages();
-            const merged = [...localMessages];
-            data.forEach(item => {
-              if (!merged.find(m => m.id === item.id)) {
-                merged.push(item);
-              }
-            });
-            saveMessagesLocalOnly(merged);
-            return merged;
+          if (data && Array.isArray(data) && data.length > 0) {
+            saveMessagesLocalOnly(data);
+            return data;
           }
         }
       } catch (e) {
