@@ -1322,11 +1322,6 @@
   </div>
 
   <script>
-    // JSONBin.io 配置
-    const JSONBIN_BASE_URL = 'https://api.jsonbin.io/v3/b';
-    const JSONBIN_API_KEY = '$2a$10$/JMf4lSTFabuPgirGVaLIe5mqvtdUjOsurwbqVBo85Fger231k4Y6';
-    const JSONBIN_ID_KEY = 'nanboJsonbinId';
-    
     const STORAGE_KEY = 'voiceBoxMessages';
     const ACTION_KEY = 'voiceBoxActions';
     const PENDING_KEY = 'voiceBoxPending';
@@ -1371,78 +1366,6 @@
       return ip;
     }
 
-    // JSONBin.io 客户端 (免费，无需API Key)
-    const jsonbinClient = {
-      async getBinId() {
-        return localStorage.getItem(JSONBIN_ID_KEY);
-      },
-      
-      async setBinId(id) {
-        localStorage.setItem(JSONBIN_ID_KEY, id);
-      },
-      
-      async fetchData() {
-        try {
-          const binId = await this.getBinId();
-          
-          if (binId) {
-            const res = await fetch(`${JSONBIN_BASE_URL}/${binId}/latest`, {
-              headers: {
-                'X-Access-Key': JSONBIN_API_KEY
-              }
-            });
-            
-            if (res.ok) {
-              const json = await res.json();
-              if (json.record) {
-                return json.record;
-              }
-            }
-          }
-          return null;
-        } catch (e) {
-          console.error('Failed to fetch from JSONBin:', e);
-          return null;
-        }
-      },
-      
-      async saveData(messages) {
-        try {
-          const binId = await this.getBinId();
-          const data = JSON.stringify(messages);
-          
-          if (binId) {
-            await fetch(`${JSONBIN_BASE_URL}/${binId}`, {
-              method: 'PUT',
-              headers: {
-                'X-Access-Key': JSONBIN_API_KEY,
-                'Content-Type': 'application/json'
-              },
-              body: data
-            });
-          } else {
-            const res = await fetch(JSONBIN_BASE_URL, {
-              method: 'POST',
-              headers: {
-                'X-Access-Key': JSONBIN_API_KEY,
-                'Content-Type': 'application/json'
-              },
-              body: data
-            });
-            
-            if (res.ok) {
-              const json = await res.json();
-              if (json.metadata && json.metadata.id) {
-                await this.setBinId(json.metadata.id);
-              }
-            }
-          }
-        } catch (e) {
-          console.error('Failed to save to JSONBin:', e);
-        }
-      }
-    };
-    
     function getMessages() {
       const data = localStorage.getItem(STORAGE_KEY);
       return data ? JSON.parse(data) : [];
@@ -1706,9 +1629,6 @@
 
       messages.push(newMessage);
       saveMessages(messages);
-      
-      // 同步到云端
-      supabaseClient.insertMessage(newMessage);
 
       const pendingIds = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
       pendingIds.push(newMessage.id);
@@ -1761,9 +1681,6 @@
 
       saveMessages(messages);
       saveUserActions(userActions);
-      
-      // 同步投票到云端
-      supabaseClient.updateMessage(messageId, { [type]: messages[msgIndex][type] });
       
       // 视觉反馈动画
       const flashEl = document.createElement('div');
@@ -2149,9 +2066,6 @@
       messages[msgIndex].status = action;
       saveMessages(messages);
       
-      // 同步到云端
-      supabaseClient.updateMessage(messageId, { status: action });
-
       // 如果是驳回或从待审核变更为其他状态，从待审核列表中移除
       if (action !== 'pending') {
         const pendingIds = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
