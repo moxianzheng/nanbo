@@ -1296,9 +1296,10 @@
   </div>
 
   <script>
-    // Supabase 配置
-    const SUPABASE_URL = 'https://pzckdyseechiptxxffcj.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_1neCs5s_4bhL23enDB_p0A_F8IvhdgY';
+    // JSONBin.io 配置 (免费，无需注册)
+    const JSONBIN_BASE_URL = 'https://api.jsonbin.io/v3/b';
+    const JSONBIN_API_KEY = '$2a$10$placeholder.key.for.jsonbin.io';
+    const JSONBIN_ID_KEY = 'nanboJsonbinId';
     
     const STORAGE_KEY = 'voiceBoxMessages';
     const ACTION_KEY = 'voiceBoxActions';
@@ -1344,67 +1345,74 @@
       return ip;
     }
 
-    // Supabase 客户端
-    const supabaseClient = {
-      async fetchMessages() {
+    // JSONBin.io 客户端 (免费，无需API Key)
+    const jsonbinClient = {
+      async getBinId() {
+        return localStorage.getItem(JSONBIN_ID_KEY);
+      },
+      
+      async setBinId(id) {
+        localStorage.setItem(JSONBIN_ID_KEY, id);
+      },
+      
+      async fetchData() {
         try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/messages?select=*&status=eq.approved&order=time.desc`, {
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${SUPABASE_KEY}`
+          const binId = await this.getBinId();
+          
+          if (binId) {
+            const res = await fetch(`${JSONBIN_BASE_URL}/${binId}/latest`, {
+              headers: {
+                'X-Access-Key': JSONBIN_API_KEY
+              }
+            });
+            
+            if (res.ok) {
+              const json = await res.json();
+              if (json.record) {
+                return json.record;
+              }
             }
-          });
-          return await res.json();
+          }
+          return null;
         } catch (e) {
-          console.error('Failed to fetch from Supabase, using localStorage:', e);
-          return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+          console.error('Failed to fetch from JSONBin:', e);
+          return null;
         }
       },
       
-      async fetchPendingMessages() {
+      async saveData(messages) {
         try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/messages?select=*&status=eq.pending&order=time.desc`, {
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${SUPABASE_KEY}`
+          const binId = await this.getBinId();
+          const data = JSON.stringify(messages);
+          
+          if (binId) {
+            await fetch(`${JSONBIN_BASE_URL}/${binId}`, {
+              method: 'PUT',
+              headers: {
+                'X-Access-Key': JSONBIN_API_KEY,
+                'Content-Type': 'application/json'
+              },
+              body: data
+            });
+          } else {
+            const res = await fetch(JSONBIN_BASE_URL, {
+              method: 'POST',
+              headers: {
+                'X-Access-Key': JSONBIN_API_KEY,
+                'Content-Type': 'application/json'
+              },
+              body: data
+            });
+            
+            if (res.ok) {
+              const json = await res.json();
+              if (json.metadata && json.metadata.id) {
+                await this.setBinId(json.metadata.id);
+              }
             }
-          });
-          return await res.json();
+          }
         } catch (e) {
-          return [];
-        }
-      },
-      
-      async insertMessage(msg) {
-        try {
-          await fetch(`${SUPABASE_URL}/rest/v1/messages`, {
-            method: 'POST',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${SUPABASE_KEY}`,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=representation'
-            },
-            body: JSON.stringify(msg)
-          });
-        } catch (e) {
-          console.error('Failed to sync to Supabase:', e);
-        }
-      },
-      
-      async updateMessage(id, updates) {
-        try {
-          await fetch(`${SUPABASE_URL}/rest/v1/messages?id=eq.${id}`, {
-            method: 'PATCH',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${SUPABASE_KEY}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updates)
-          });
-        } catch (e) {
-          console.error('Failed to update Supabase:', e);
+          console.error('Failed to save to JSONBin:', e);
         }
       }
     };
@@ -1416,23 +1424,23 @@
 
     function saveMessages(messages) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+      jsonbinClient.saveData(messages);
     }
 
     async function loadMessagesFromCloud() {
-      const cloudMessages = await supabaseClient.fetchMessages();
+      const cloudData = await jsonbinClient.fetchData();
       const localMessages = getMessages();
       
-      // 合并本地和云端数据，去重
-      const merged = [...localMessages];
-      cloudMessages.forEach(cm => {
-        if (!merged.find(m => m.id === cm.id)) {
-          merged.push(cm);
-        }
-      });
-      
-      // 保存合并结果
-      saveMessages(merged);
-      return merged;
+      if (cloudData) {
+        const merged = [...localMessages];
+        cloudData.forEach(cm => {
+          if (!merged.find(m => m.id === cm.id)) {
+            merged.push(cm);
+          }
+        });
+        saveMessages(merged);
+      }
+      return getMessages();
     }
 
     function getUserActions() {
