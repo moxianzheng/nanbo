@@ -1296,6 +1296,10 @@
   </div>
 
   <script>
+    // Supabase 配置
+    const SUPABASE_URL = 'https://pzckdyseechiptxxffcj.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_1neCs5s_4bhL23enDB_p0A_F8IvhdgY';
+    
     const STORAGE_KEY = 'voiceBoxMessages';
     const ACTION_KEY = 'voiceBoxActions';
     const PENDING_KEY = 'voiceBoxPending';
@@ -1340,6 +1344,71 @@
       return ip;
     }
 
+    // Supabase 客户端
+    const supabaseClient = {
+      async fetchMessages() {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/messages?select=*&status=eq.approved&order=time.desc`, {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+          });
+          return await res.json();
+        } catch (e) {
+          console.error('Failed to fetch from Supabase, using localStorage:', e);
+          return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        }
+      },
+      
+      async fetchPendingMessages() {
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/messages?select=*&status=eq.pending&order=time.desc`, {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+          });
+          return await res.json();
+        } catch (e) {
+          return [];
+        }
+      },
+      
+      async insertMessage(msg) {
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/messages`, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'return=representation'
+            },
+            body: JSON.stringify(msg)
+          });
+        } catch (e) {
+          console.error('Failed to sync to Supabase:', e);
+        }
+      },
+      
+      async updateMessage(id, updates) {
+        try {
+          await fetch(`${SUPABASE_URL}/rest/v1/messages?id=eq.${id}`, {
+            method: 'PATCH',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updates)
+          });
+        } catch (e) {
+          console.error('Failed to update Supabase:', e);
+        }
+      }
+    };
+    
     function getMessages() {
       const data = localStorage.getItem(STORAGE_KEY);
       return data ? JSON.parse(data) : [];
@@ -1347,6 +1416,23 @@
 
     function saveMessages(messages) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    }
+
+    async function loadMessagesFromCloud() {
+      const cloudMessages = await supabaseClient.fetchMessages();
+      const localMessages = getMessages();
+      
+      // 合并本地和云端数据，去重
+      const merged = [...localMessages];
+      cloudMessages.forEach(cm => {
+        if (!merged.find(m => m.id === cm.id)) {
+          merged.push(cm);
+        }
+      });
+      
+      // 保存合并结果
+      saveMessages(merged);
+      return merged;
     }
 
     function getUserActions() {
@@ -1552,6 +1638,9 @@
 
       messages.push(newMessage);
       saveMessages(messages);
+      
+      // 同步到云端
+      supabaseClient.insertMessage(newMessage);
 
       const pendingIds = JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
       pendingIds.push(newMessage.id);
@@ -1604,6 +1693,9 @@
 
       saveMessages(messages);
       saveUserActions(userActions);
+      
+      // 同步投票到云端
+      supabaseClient.updateMessage(messageId, { [type]: messages[msgIndex][type] });
       
       // 视觉反馈动画
       const flashEl = document.createElement('div');
@@ -1988,6 +2080,9 @@
 
       messages[msgIndex].status = action;
       saveMessages(messages);
+      
+      // 同步到云端
+      supabaseClient.updateMessage(messageId, { status: action });
 
       // 如果是驳回或从待审核变更为其他状态，从待审核列表中移除
       if (action !== 'pending') {
@@ -2025,8 +2120,13 @@
       }
     });
 
-    initSampleData();
-    renderMessages();
+    // 初始化时从云端加载数据
+    async function init() {
+      await loadMessagesFromCloud();
+      renderMessages();
+    }
+    
+    init();
   </script>
 </body>
 </html>
