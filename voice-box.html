@@ -1322,7 +1322,13 @@
   </div>
 
   <script>
+    // Firebase Realtime Database 配置
+    const FIREBASE_URL = 'https://nanbo-23cf3-default-rtdb.asia-southeast1.firebasedatabase.app';
+    
     const STORAGE_KEY = 'voiceBoxMessages';
+    const ACTION_KEY = 'voiceBoxActions';
+    const PENDING_KEY = 'voiceBoxPending';
+    const REVIEW_PASSWORD = 'Ly123455';
     const ACTION_KEY = 'voiceBoxActions';
     const PENDING_KEY = 'voiceBoxPending';
     const REVIEW_PASSWORD = 'Ly123455';
@@ -1373,10 +1379,48 @@
 
     function saveMessages(messages) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+      // 自动同步到云端
+      syncToCloud(messages);
+    }
+
+    // Firebase 同步
+    async function syncToCloud(messages) {
+      try {
+        await fetch(`${FIREBASE_URL}/messages.json`, {
+          method: 'PUT',
+          body: JSON.stringify(messages)
+        });
+      } catch (e) {
+        console.error('同步失败:', e);
+      }
     }
 
     async function loadMessagesFromCloud() {
+      try {
+        const res = await fetch(`${FIREBASE_URL}/messages.json`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data)) {
+            // 合并云端和本地数据
+            const localMessages = getMessages();
+            const merged = [...localMessages];
+            data.forEach(item => {
+              if (!merged.find(m => m.id === item.id)) {
+                merged.push(item);
+              }
+            });
+            saveMessagesLocalOnly(merged);
+            return merged;
+          }
+        }
+      } catch (e) {
+        console.error('获取云端数据失败:', e);
+      }
       return getMessages();
+    }
+
+    function saveMessagesLocalOnly(messages) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
     }
 
     // 导出数据
