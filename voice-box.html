@@ -1380,6 +1380,11 @@
       syncToCloud(messages);
     }
 
+    async function saveMessagesAndWait(messages) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+      await syncToCloud(messages);
+    }
+
     // Firebase 同步
     async function syncToCloud(messages) {
       try {
@@ -1448,6 +1453,7 @@
               }
             });
             saveMessages(merged);
+            syncToCloud(merged);
             renderMessages();
             showToast(`成功导入 ${imported.length} 条消息`);
           }
@@ -2081,7 +2087,7 @@
       });
 
       if (updated) {
-        saveMessages(messages);
+        await saveMessagesAndWait(messages);
       }
 
       window.reviewSelectedIds = new Set();
@@ -2090,14 +2096,14 @@
       renderMessages();
     }
 
-    function reviewMessage(messageId, action) {
+    async function reviewMessage(messageId, action) {
       const messages = getMessages();
       const msgIndex = messages.findIndex(m => m.id === messageId);
       
       if (msgIndex === -1) return;
 
       messages[msgIndex].status = action;
-      saveMessages(messages);
+      await saveMessagesAndWait(messages);
       
       // 如果是驳回或从待审核变更为其他状态，从待审核列表中移除
       if (action !== 'pending') {
