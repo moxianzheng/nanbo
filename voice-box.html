@@ -2146,10 +2146,14 @@
       await loadMessagesFromCloud();
       renderMessages();
       
-      // 每5秒自动同步一次
+      // 每5秒自动同步一次，并刷新审核页面
       setInterval(async () => {
         await loadMessagesFromCloud();
         renderMessages();
+        // 如果审核面板打开着，也刷新审核列表
+        if (document.getElementById('reviewPanel').classList.contains('show')) {
+          renderReviewList();
+        }
       }, 5000);
     }
     
