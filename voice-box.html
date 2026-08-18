@@ -251,6 +251,27 @@
       transform: translateY(0);
     }
 
+    .sync-btn {
+      flex: 1;
+      padding: 10px 16px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      background: rgba(176, 38, 255, 0.2);
+      border: 1px solid rgba(176, 38, 255, 0.4);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .sync-btn:hover {
+      background: rgba(176, 38, 255, 0.4);
+      border-color: rgba(176, 38, 255, 0.6);
+    }
+
     .tabs-container {
       background: linear-gradient(145deg, rgba(18, 18, 26, 0.9), rgba(10, 10, 18, 0.95));
       border: 1px solid rgba(176, 38, 255, 0.2);
@@ -1209,6 +1230,11 @@
         <textarea id="message" placeholder="说点什么吧..." maxlength="500"></textarea>
       </div>
       <button class="publish-btn" onclick="publishMessage()">发射信号</button>
+      <div style="display: flex; gap: 10px; margin-top: 12px;">
+        <button class="sync-btn" onclick="exportData()">导出数据</button>
+        <button class="sync-btn" onclick="importData()">导入数据</button>
+      </div>
+      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(event)">
     </section>
 
     <div class="tabs-container">
@@ -1296,9 +1322,9 @@
   </div>
 
   <script>
-    // JSONBin.io 配置 (免费，无需注册)
+    // JSONBin.io 配置
     const JSONBIN_BASE_URL = 'https://api.jsonbin.io/v3/b';
-    const JSONBIN_API_KEY = '$2a$10$placeholder.key.for.jsonbin.io';
+    const JSONBIN_API_KEY = '$2a$10$/JMf4lSTFabuPgirGVaLIe5mqvtdUjOsurwbqVBo85Fger231k4Y6';
     const JSONBIN_ID_KEY = 'nanboJsonbinId';
     
     const STORAGE_KEY = 'voiceBoxMessages';
@@ -1424,23 +1450,57 @@
 
     function saveMessages(messages) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-      jsonbinClient.saveData(messages);
     }
 
     async function loadMessagesFromCloud() {
-      const cloudData = await jsonbinClient.fetchData();
-      const localMessages = getMessages();
-      
-      if (cloudData) {
-        const merged = [...localMessages];
-        cloudData.forEach(cm => {
-          if (!merged.find(m => m.id === cm.id)) {
-            merged.push(cm);
-          }
-        });
-        saveMessages(merged);
-      }
       return getMessages();
+    }
+
+    // 导出数据
+    function exportData() {
+      const messages = getMessages();
+      const data = JSON.stringify(messages, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `nanbo-backup-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('数据已导出');
+    }
+
+    // 导入数据
+    function importData() {
+      document.getElementById('importFile').click();
+    }
+
+    function handleImport(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            const local = getMessages();
+            const merged = [...local];
+            imported.forEach(item => {
+              if (!merged.find(m => m.id === item.id)) {
+                merged.push(item);
+              }
+            });
+            saveMessages(merged);
+            renderMessages();
+            showToast(`成功导入 ${imported.length} 条消息`);
+          }
+        } catch (err) {
+          showToast('导入失败：文件格式错误');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
     }
 
     function getUserActions() {
