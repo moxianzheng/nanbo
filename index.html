@@ -1860,6 +1860,9 @@
         currentMessages = messages.filter(m => m.status === 'rejected');
       }
 
+      // 按时间倒序
+      currentMessages.sort((a, b) => b.time - a.time);
+
       const PAGE_SIZE = 20;
       const startIndex = (window.reviewPage - 1) * PAGE_SIZE;
       const pageMessages = currentMessages.slice(startIndex, startIndex + PAGE_SIZE);
@@ -1888,6 +1891,9 @@
       } else {
         currentMessages = messages.filter(m => m.status === 'rejected');
       }
+
+      // 按时间倒序
+      currentMessages.sort((a, b) => b.time - a.time);
 
       const PAGE_SIZE = 20;
       const startIndex = (window.reviewPage - 1) * PAGE_SIZE;
